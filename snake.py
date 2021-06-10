@@ -295,6 +295,7 @@ run = True
 while run:
     for event in pygame.event.get():
         if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+            change_score_data(snake)
             run = False
         if event.type == KEYDOWN:
             if event.key == K_SPACE:
