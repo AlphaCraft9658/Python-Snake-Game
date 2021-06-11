@@ -181,16 +181,16 @@ class Snake:
             if event.type == KEYDOWN:
                 if len(self.key_pattern) > 0:
                     if event.key == K_RIGHT:
-                        if self.key_pattern[-1] != 2:
+                        if self.key_pattern[-1] != 2 != 0:
                             self.key_pattern.append(0)
                     if event.key == K_LEFT:
-                        if self.key_pattern[-1] != 0:
+                        if self.key_pattern[-1] != 0 != 2:
                             self.key_pattern.append(2)
                     if event.key == K_UP:
-                        if self.key_pattern[-1] != 1:
+                        if self.key_pattern[-1] != 1 != 3:
                             self.key_pattern.append(3)
                     if event.key == K_DOWN:
-                        if self.key_pattern[-1] != 3:
+                        if self.key_pattern[-1] != 3 != 1:
                             self.key_pattern.append(1)
                 else:
                     if event.key == K_RIGHT:
