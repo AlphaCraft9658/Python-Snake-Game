@@ -86,7 +86,6 @@ def change_score_data(self):
         with open("data.snx", "w") as d:
             for i in str(high_score):
                 d.write(list(data_keys.keys())[int(i)])
-                print(i)
     score_text = score_font.render(f"Score: {self.length - 2}", True, (0, 0, 0))
     score_text_rect = score_text.get_rect()
     score_text_rect.bottomleft = screen_rect.bottomleft
@@ -205,7 +204,6 @@ class Snake:
                     if event.key == K_DOWN:
                         if 1 != self.direction != 3:
                             self.key_pattern.append(1)
-                print(self.key_pattern)
 
         keys = pygame.key.get_pressed()
         if keys[K_RIGHT] and self.direction == 0:
