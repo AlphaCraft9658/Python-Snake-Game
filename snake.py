@@ -181,30 +181,31 @@ class Snake:
             if event.type == KEYDOWN:
                 if len(self.key_pattern) > 0:
                     if event.key == K_RIGHT:
-                        if self.key_pattern[-1] != 2 != 0:
+                        if 0 != self.key_pattern[-1] != 2:
                             self.key_pattern.append(0)
                     if event.key == K_LEFT:
-                        if self.key_pattern[-1] != 0 != 2:
+                        if 2 != self.key_pattern[-1] != 0:
                             self.key_pattern.append(2)
                     if event.key == K_UP:
-                        if self.key_pattern[-1] != 1 != 3:
+                        if 3 != self.key_pattern[-1] != 1:
                             self.key_pattern.append(3)
                     if event.key == K_DOWN:
-                        if self.key_pattern[-1] != 3 != 1:
+                        if 1 != self.key_pattern[-1] != 3:
                             self.key_pattern.append(1)
                 else:
                     if event.key == K_RIGHT:
-                        if self.direction != 2:
+                        if 0 != self.direction != 2:
                             self.key_pattern.append(0)
                     if event.key == K_LEFT:
-                        if self.direction != 0:
+                        if 2 != self.direction != 0:
                             self.key_pattern.append(2)
                     if event.key == K_UP:
-                        if self.direction != 1:
+                        if 3 != self.direction != 1:
                             self.key_pattern.append(3)
                     if event.key == K_DOWN:
-                        if self.direction != 3:
+                        if 1 != self.direction != 3:
                             self.key_pattern.append(1)
+                print(self.key_pattern)
 
         keys = pygame.key.get_pressed()
         if keys[K_RIGHT] and self.direction == 0:
