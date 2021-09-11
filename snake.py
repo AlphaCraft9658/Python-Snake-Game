@@ -32,6 +32,7 @@ screen_rect = screen.get_rect()
 
 font = pygame.font.Font(rp("fonts/DisposableDroidBB_bld.ttf"), 42)
 score_font = pygame.font.Font(rp("fonts/DisposableDroidBB_bld.ttf"), 32)
+live_score_font = pygame.font.Font(rp("fonts/DisposableDroidBB_bld.ttf"), 54)
 start_text = font.render("Press space to start!", True, (0, 0, 0))
 start_text_rect = start_text.get_rect()
 start_text_rect.centerx = screen_rect.centerx
@@ -43,6 +44,9 @@ score_text_rect = score_text.get_rect()
 score_text_rect.bottomleft = screen_rect.bottomleft
 score_text_rect.x += 5
 score_text_rect.y -= 5
+live_hs_text = score_font.render("0", True, (0, 0, 0))
+live_hs_rect = live_hs_text.get_rect()
+live_hs_rect.y = 45
 
 high_score = 0
 
@@ -316,13 +320,21 @@ def change_text_transparency():
 
 
 def draw_score():
+    global high_score, live_hs_text, live_hs_rect
     if snake.length < 2:
-        score = font.render("0", True, (0, 0, 0))
+        score = live_score_font.render("0", True, (0, 0, 0))
     else:
-        score = font.render(f"{snake.length - 2}", True, (0, 0, 0))
+        score = live_score_font.render(f"{snake.length - 2}", True, (0, 0, 0))
+
+    live_hs_text = score_font.render(f"{high_score}", True, (0, 0, 0))
+    live_hs_rect = live_hs_text.get_rect()
+    live_hs_rect.centerx = screen_rect.centerx
+    live_hs_rect.y = 45
+
     score_rect = score.get_rect()
     score_rect.centerx = screen_rect.centerx
     screen.blit(score, score_rect)
+    screen.blit(live_hs_text, live_hs_rect)
 
 
 snake = Snake()
@@ -331,10 +343,20 @@ food = Food()
 run = True
 while run:
     for event in pygame.event.get():
-        if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+        if event.type == QUIT:
             change_score_data(snake)
             run = False
         if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                change_score_data(snake)
+                if started:
+                    started = False
+                    game_lost = True
+                    fade_direction = 0
+                    start_text.set_alpha(0)
+                    snake.key_pattern.clear()
+                else:
+                    run = False
             if event.key == K_SPACE:
                 if not started:
                     started = True
@@ -371,6 +393,8 @@ while run:
                 if snake.tbs < .1:
                     snake.tbs = .1
 
+    if not run:
+        screen.fill((0, 0, 0))
     pygame.display.update()
     clock.tick(60)
 pygame.quit()
