@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Snake!
+Exec="/media/alpha-craft/Ubuntu Files/Programming/Python/Python-Snake-Game/Snake!"
+Comment=""
+Icon=/media/alpha-craft/Ubuntu Files/Programming/Python/Python-Snake-Game/icon.ico
+Type=Application
+Terminal=false
+Encoding=UTF-8
+Categories=Game

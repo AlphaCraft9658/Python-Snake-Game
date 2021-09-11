@@ -3,22 +3,35 @@ from pygame.locals import *
 from time import time
 from random import randint
 from typing import Union
+import os, sys
 
 pygame.init()
 
+
+def rp(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+
 screen = pygame.display.set_mode((500, 500))
 pygame.display.set_caption("Snake!")
-pygame.display.set_icon(pygame.image.load("img/icon.png"))
+pygame.display.set_icon(pygame.image.load(rp("img/icon.png")))
 
-pygame.mixer.music.load("aud/music/back_music.mp3")
+pygame.mixer.music.load(rp("aud/music/back_music.ogg"))
 pygame.mixer.music.set_volume(.5)
 pygame.mixer.music.play(-1)
 
 clock = pygame.time.Clock()
 screen_rect = screen.get_rect()
 
-font = pygame.font.Font("fonts/DisposableDroidBB_bld.ttf", 42)
-score_font = pygame.font.Font("fonts/DisposableDroidBB_bld.ttf", 32)
+font = pygame.font.Font(rp("fonts/DisposableDroidBB_bld.ttf"), 42)
+score_font = pygame.font.Font(rp("fonts/DisposableDroidBB_bld.ttf"), 32)
 start_text = font.render("Press space to start!", True, (0, 0, 0))
 start_text_rect = start_text.get_rect()
 start_text_rect.centerx = screen_rect.centerx
@@ -34,7 +47,7 @@ score_text_rect.y -= 5
 high_score = 0
 
 data_keys = {"!": 0, "&": 1, "$": 2, "%": 3, "§": 4, "=": 5, "?": 6, ")": 7, "(": 8, "/": 9}
-data = open("data.snx", "r")
+data = open(rp("data.snx"), "r")
 data_value = list(data.read())
 for i in range(len(data_value)):
     if data_value[i] in data_keys:
@@ -42,7 +55,7 @@ for i in range(len(data_value)):
     else:
         data_value = ["0"]
         data.close()
-        data = open("data.snx", "w")
+        data = open(rp("data.snx"), "w")
         data.write("!")
         break
 data_value = [str(i) for i in data_value]
@@ -52,7 +65,7 @@ try:
     int(data_value)
 except:
     data.close()
-    data = open("data.snx", "w")
+    data = open(rp("data.snx"), "w")
     data.write("!")
 else:
     high_score = int(data_value)
@@ -83,7 +96,7 @@ def change_score_data(self):
         hs_text_rect.bottomright = screen_rect.bottomright
         hs_text_rect.x -= 5
         hs_text_rect.y -= 5
-        with open("data.snx", "w") as d:
+        with open(rp("data.snx"), "w") as d:
             for i in str(high_score):
                 d.write(list(data_keys.keys())[int(i)])
     score_text = score_font.render(f"Score: {self.length - 2}", True, (0, 0, 0))
