@@ -1,9 +1,8 @@
 import pygame
 from pygame.locals import *
-from time import time
+from time import time, sleep
 from random import randint
 from typing import Union
-import os, sys
 
 pygame.init()
 
@@ -116,6 +115,15 @@ class Snake:
         self.key_pattern = []
         self.wait_for_appending = False
         self.time_since_click_start = None
+        self.double_time = 0
+        self.saved_key_pattern = None
+
+        self.b_styles = ((0, 4, 20, 12), (4, 0, 12, 20), (0, 4, 20, 12), (4, 0, 12, 20))
+        self.b_styles_c = (((4, 4), (20, 4), (20, 15), (15, 15), (15, 20), (4, 20)),
+                           ((0, 4), (15, 4), (15, 20), (4, 20), (4, 15), (0, 15)),
+                           ((0, 4), (4, 4), (4, 0), (15, 0), (15, 15), (0, 15)),
+                           ((4, 0), (15, 0), (15, 4), (20, 4), (20, 15), (4, 15)))
+        self.e_styles = ((0, 4, 16, 12), (4, 0, 12, 16), (4, 4, 16, 12), (4, 4, 12, 16))
 
     def reset(self):
         self.head = [11, 11]
@@ -128,8 +136,16 @@ class Snake:
 
     def move(self):
         global started, game_lost, fade_direction, high_score, score_text, score_text_rect, hs_text, hs_text_rect
-        if time() - self.saved_time > self.tbs:
-            if self.check_for_self_collide():
+        if self.saved_key_pattern != self.key_pattern:
+            self.double_time = 0
+        if (time() - self.saved_time >= self.tbs and self.double_time == 0) or (time() - self.saved_time >= .5 and self.double_time == 1):
+            self.saved_key_pattern = self.key_pattern.copy()
+            if self.double_time == 1 and not self.check_for_self_collide():
+                self.double_time = 0
+            if self.check_for_self_collide() and self.double_time == 0:
+                self.double_time = 1
+                return
+            elif self.check_for_self_collide() and self.double_time == 1:
                 game_lost = True
                 started = False
                 fade_direction = 0
@@ -140,16 +156,6 @@ class Snake:
                     self.direction = self.key_pattern[0]
                     self.key_pattern.pop(0)
 
-                if not screen_rect.contains(Rect((self.head[0] + self.directions[self.direction][0]) * 20,
-                                                 (self.head[1] + self.directions[self.direction][1]) * 20, 20, 20)):
-                    started = False
-                    game_lost = True
-                    fade_direction = 0
-                    start_text.set_alpha(0)
-                    self.key_pattern.clear()
-                    change_score_data(self)
-                    return
-
                 if self.wait_for_appending and len(self.body) > 0:
                     self.body.append(self.body[-1])
                     self.wait_for_appending = False
@@ -159,8 +165,19 @@ class Snake:
                                      (self.directions[self.direction][0] * -1, self.directions[self.direction][1] * -1))
                     self.body.pop(-1)
 
-                self.head[0] += self.directions[self.direction][0]
-                self.head[1] += self.directions[self.direction][1]
+                if self.head[0] == 0 and self.direction == 2:
+                    self.head[0] = 24
+                elif self.head[0] == 24 and self.direction == 0:
+                    self.head[0] = 0
+                else:
+                    self.head[0] += self.directions[self.direction][0]
+
+                if self.head[1] == 0 and self.direction == 3:
+                    self.head[1] = 24
+                elif self.head[1] == 24 and self.direction == 1:
+                    self.head[1] = 0
+                else:
+                    self.head[1] += self.directions[self.direction][1]
 
                 if self.length < 2:
                     if len(self.body) > 0:
@@ -173,12 +190,53 @@ class Snake:
                 self.saved_time = time()
 
     def draw(self, surface):
-        pygame.draw.rect(surface, (255, 219, 5), (self.head[0] * 20, self.head[1] * 20, 20, 20))
+        corner = pygame.Surface((20, 20))
+        corner.set_colorkey((0, 0, 0))
+        tile_dir = None
+        if len(self.body) == 0:
+            pygame.draw.rect(surface, (255, 219, 5), (self.head[0] * 20 + 4, self.head[1] * 20 + 4, 12, 12))
+        else:
+            pygame.draw.rect(surface, (255, 219, 5), (self.head[0] * 20 + self.e_styles[self.direction][0], self.head[1] * 20 + self.e_styles[self.direction][1], self.e_styles[self.direction][2], self.e_styles[self.direction][3]))
         self.cursor = self.head.copy()
-        for v in self.body:
-            self.cursor[0] += v[0]
-            self.cursor[1] += v[1]
-            pygame.draw.rect(surface, (255, 219, 5), (self.cursor[0] * 20, self.cursor[1] * 20, 20, 20))
+        for v_i, v in enumerate(self.body):
+            if self.cursor[0] == 0 and v[0] == -1:
+                self.cursor[0] = 24
+            elif self.cursor[0] == 24 and v[0] == 1:
+                self.cursor[0] = 0
+            else:
+                self.cursor[0] += v[0]
+
+            if self.cursor[1] == 0 and v[1] == -1:
+                self.cursor[1] = 24
+            elif self.cursor[1] == 24 and v[1] == 1:
+                self.cursor[1] = 0
+            else:
+                self.cursor[1] += v[1]
+
+            tile_dir = self.directions.index((v[0] * -1, v[1] * -1))
+            if v_i == len(self.body) - 1:
+                pygame.draw.rect(surface, (255, 219, 5), (self.cursor[0] * 20 + self.e_styles[tile_dir - 2][0],
+                                                          self.cursor[1] * 20 + self.e_styles[tile_dir - 2][1],
+                                                          self.e_styles[tile_dir - 2][2],
+                                                          self.e_styles[tile_dir - 2][3]))
+            elif v_i < len(self.body) - 1:
+                if self.body[v_i + 1] != v:
+                    corner.fill((0, 0, 0))
+                    if (tile_dir == 1 and self.directions.index((self.body[v_i + 1][0] * -1, self.body[v_i + 1][1] * -1)) == 2) or (tile_dir == 0 and self.directions.index((self.body[v_i + 1][0] * -1, self.body[v_i + 1][1] * -1)) == 3):
+                        pygame.draw.polygon(corner, (255, 219, 5), self.b_styles_c[0])
+                    elif (tile_dir == 1 and self.directions.index((self.body[v_i + 1][0] * -1, self.body[v_i + 1][1] * -1)) == 0) or (tile_dir == 2 and self.directions.index((self.body[v_i + 1][0] * -1, self.body[v_i + 1][1] * -1)) == 3):
+                        pygame.draw.polygon(corner, (255, 219, 5), self.b_styles_c[1])
+                    elif (tile_dir == 3 and self.directions.index((self.body[v_i + 1][0] * -1, self.body[v_i + 1][1] * -1)) == 0) or (tile_dir == 2 and self.directions.index((self.body[v_i + 1][0] * -1, self.body[v_i + 1][1] * -1)) == 1):
+                        pygame.draw.polygon(corner, (255, 219, 5), self.b_styles_c[2])
+                    elif (tile_dir == 0 and self.directions.index((self.body[v_i + 1][0] * -1, self.body[v_i + 1][1] * -1)) == 1) or (tile_dir == 3 and self.directions.index((self.body[v_i + 1][0] * -1, self.body[v_i + 1][1] * -1)) == 2):
+                        pygame.draw.polygon(corner, (255, 219, 5), self.b_styles_c[3])
+                    surface.blit(corner, (self.cursor[0] * 20, self.cursor[1] * 20))
+                else:
+                    pygame.draw.rect(surface, (255, 219, 5), (self.cursor[0] * 20 + self.b_styles[tile_dir][0], self.cursor[1] * 20 + self.b_styles[tile_dir][1], self.b_styles[tile_dir][2], self.b_styles[tile_dir][3]))
+            else:
+                pygame.draw.rect(surface, (255, 219, 5), (self.cursor[0] * 20 + self.b_styles[tile_dir][0], self.cursor[1] * 20 + self.b_styles[tile_dir][1], self.b_styles[tile_dir][2], self.b_styles[tile_dir][3]))
+
+        # pygame.draw.rect(surface, (255, 219, 5), (0 + self.e_styles[3][0], 0 + self.e_styles[3][1], self.e_styles[3][2], self.e_styles[3][3]))
 
     def handle_input(self, event: Union[pygame.event.Event] = None):
         if event:
