@@ -236,8 +236,6 @@ class Snake:
             else:
                 pygame.draw.rect(surface, (255, 219, 5), (self.cursor[0] * 20 + self.b_styles[tile_dir][0], self.cursor[1] * 20 + self.b_styles[tile_dir][1], self.b_styles[tile_dir][2], self.b_styles[tile_dir][3]))
 
-        # pygame.draw.rect(surface, (255, 219, 5), (0 + self.e_styles[3][0], 0 + self.e_styles[3][1], self.e_styles[3][2], self.e_styles[3][3]))
-
     def handle_input(self, event: Union[pygame.event.Event] = None):
         if event:
             if event.type == KEYDOWN:
@@ -245,28 +243,36 @@ class Snake:
                     if event.key == K_RIGHT:
                         if 0 != self.key_pattern[-1] != 2:
                             self.key_pattern.append(0)
+                            self.time_since_click_start = None
                     if event.key == K_LEFT:
                         if 2 != self.key_pattern[-1] != 0:
                             self.key_pattern.append(2)
+                            self.time_since_click_start = None
                     if event.key == K_UP:
                         if 3 != self.key_pattern[-1] != 1:
                             self.key_pattern.append(3)
+                            self.time_since_click_start = None
                     if event.key == K_DOWN:
                         if 1 != self.key_pattern[-1] != 3:
                             self.key_pattern.append(1)
+                            self.time_since_click_start = None
                 else:
                     if event.key == K_RIGHT:
                         if 0 != self.direction != 2:
                             self.key_pattern.append(0)
+                            self.time_since_click_start = None
                     if event.key == K_LEFT:
                         if 2 != self.direction != 0:
                             self.key_pattern.append(2)
+                            self.time_since_click_start = None
                     if event.key == K_UP:
                         if 3 != self.direction != 1:
                             self.key_pattern.append(3)
+                            self.time_since_click_start = None
                     if event.key == K_DOWN:
                         if 1 != self.direction != 3:
                             self.key_pattern.append(1)
+                            self.time_since_click_start = None
 
         keys = pygame.key.get_pressed()
         if keys[K_RIGHT] and self.direction == 0:
