@@ -4,13 +4,14 @@ from time import time, sleep
 from random import randint
 from typing import Union
 
+pygame.mixer.pre_init(44100, -16, 2, 1024)
 pygame.init()
 
 screen = pygame.display.set_mode((500, 500))
 pygame.display.set_caption("Snake!")
 pygame.display.set_icon(pygame.image.load("img/icon.png"))
 
-pygame.mixer.music.load("aud/music/back_music.ogg")
+pygame.mixer.music.load("aud/music/back_music.wav")
 pygame.mixer.music.set_volume(.5)
 pygame.mixer.music.play(-1)
 
@@ -310,8 +311,20 @@ class Snake:
         else:
             self.cursor = self.head.copy()
             for tile in self.body:
-                self.cursor[0] += tile[0]
-                self.cursor[1] += tile[1]
+                if self.cursor[0] == 0 and tile[0] == -1:
+                    self.cursor[0] = 24
+                elif self.cursor[0] == 24 and tile[0] == 1:
+                    self.cursor[0] = 0
+                else:
+                    self.cursor[0] += tile[0]
+
+                if self.cursor[1] == 0 and tile[1] == -1:
+                    self.cursor[1] = 24
+                elif self.cursor[1] == 24 and tile[1] == 1:
+                    self.cursor[1] = 0
+                else:
+                    self.cursor[1] += tile[1]
+
                 if tuple(self.cursor) == grid_pos:
                     return True
         return False
@@ -321,8 +334,20 @@ class Snake:
         self.self_collide_check_cursor = self.head.copy()
         for index, tile in enumerate(self.body):
             if index != len(self.body) - 1:
-                self.self_collide_check_cursor[0] += tile[0]
-                self.self_collide_check_cursor[1] += tile[1]
+                if self.self_collide_check_cursor[0] == 0 and tile[0] == -1:
+                    self.self_collide_check_cursor[0] = 24
+                elif self.self_collide_check_cursor == 24 and tile[0] == 1:
+                    self.self_collide_check_cursor[0] = 0
+                else:
+                    self.self_collide_check_cursor[0] += tile[0]
+
+                if self.self_collide_check_cursor[1] == 0 and tile[1] == -1:
+                    self.self_collide_check_cursor[1] = 24
+                elif self.self_collide_check_cursor[1] == 24 and tile[1] == 1:
+                    self.self_collide_check_cursor[1] = 0
+                else:
+                    self.self_collide_check_cursor[1] += tile[1]
+
                 if len(self.key_pattern) > 0:
                     if tuple(self.self_collide_check_cursor) == (self.head[0] + self.directions[self.key_pattern[0]][0],
                                                                  self.head[1] + self.directions[self.key_pattern[0]][1]):
