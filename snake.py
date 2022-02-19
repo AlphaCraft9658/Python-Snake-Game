@@ -8,12 +8,16 @@ pygame.mixer.pre_init(44100, -16, 2, 1024)
 pygame.init()
 
 screen = pygame.display.set_mode((500, 500))
-pygame.display.set_caption("Snake!")
+pygame.display.set_caption("pySnake!")
 pygame.display.set_icon(pygame.image.load("img/icon.png"))
 
-pygame.mixer.music.load("aud/music/back_music.wav")
-pygame.mixer.music.set_volume(.5)
-pygame.mixer.music.play(-1)
+# pygame.mixer.music.load("aud/music/back_music.wav")
+# pygame.mixer.music.set_volume(.5)
+# pygame.mixer.music.play(-1)
+sound_left = pygame.mixer.Sound("aud/sounds/left.wav")
+sound_right = pygame.mixer.Sound("aud/sounds/right.wav")
+sound_die = pygame.mixer.Sound("aud/sounds/die2.wav")
+sound_eat = pygame.mixer.Sound("aud/sounds/eat.wav")
 
 clock = pygame.time.Clock()
 screen_rect = screen.get_rect()
@@ -35,6 +39,10 @@ score_text_rect.y -= 5
 live_hs_text = score_font.render("0", True, (0, 0, 0))
 live_hs_rect = live_hs_text.get_rect()
 live_hs_rect.y = 45
+
+play_death_animation = False
+d_a_i = 0
+d_a_s = pygame.Surface((500, 500))
 
 high_score = 0
 
@@ -67,7 +75,6 @@ hs_text_rect = hs_text.get_rect()
 hs_text_rect.bottomright = screen_rect.bottomright
 hs_text_rect.x -= 5
 hs_text_rect.y -= 5
-
 
 display_grid = pygame.Surface((500, 500))
 display_grid.set_colorkey((0, 0, 0))
@@ -136,7 +143,7 @@ class Snake:
         self.wait_for_appending = False
 
     def move(self):
-        global started, game_lost, fade_direction, high_score, score_text, score_text_rect, hs_text, hs_text_rect
+        global started, game_lost, fade_direction, high_score, score_text, score_text_rect, hs_text, hs_text_rect, play_death_animation
         if self.saved_key_pattern != self.key_pattern:
             self.double_time = 0
         if (time() - self.saved_time >= self.tbs and self.double_time == 0) or (time() - self.saved_time >= .5 and self.double_time == 1):
@@ -151,6 +158,9 @@ class Snake:
                 started = False
                 fade_direction = 0
                 start_text.set_alpha(0)
+                game_lost = True
+                play_death_animation = True
+                sound_die.play()
 
             if not game_lost:
                 if len(self.key_pattern) > 0:
@@ -240,40 +250,73 @@ class Snake:
     def handle_input(self, event: Union[pygame.event.Event] = None):
         if event:
             if event.type == KEYDOWN:
-                if len(self.key_pattern) > 0:
-                    if event.key == K_RIGHT:
-                        if 0 != self.key_pattern[-1] != 2:
-                            self.key_pattern.append(0)
-                            self.time_since_click_start = None
-                    if event.key == K_LEFT:
-                        if 2 != self.key_pattern[-1] != 0:
-                            self.key_pattern.append(2)
-                            self.time_since_click_start = None
-                    if event.key == K_UP:
-                        if 3 != self.key_pattern[-1] != 1:
-                            self.key_pattern.append(3)
-                            self.time_since_click_start = None
-                    if event.key == K_DOWN:
-                        if 1 != self.key_pattern[-1] != 3:
-                            self.key_pattern.append(1)
-                            self.time_since_click_start = None
-                else:
-                    if event.key == K_RIGHT:
-                        if 0 != self.direction != 2:
-                            self.key_pattern.append(0)
-                            self.time_since_click_start = None
-                    if event.key == K_LEFT:
-                        if 2 != self.direction != 0:
-                            self.key_pattern.append(2)
-                            self.time_since_click_start = None
-                    if event.key == K_UP:
-                        if 3 != self.direction != 1:
-                            self.key_pattern.append(3)
-                            self.time_since_click_start = None
-                    if event.key == K_DOWN:
-                        if 1 != self.direction != 3:
-                            self.key_pattern.append(1)
-                            self.time_since_click_start = None
+                if len(self.key_pattern) <= 6:
+                    if len(self.key_pattern) > 0:
+                        if event.key == K_RIGHT:
+                            if 0 != self.key_pattern[-1] != 2:
+                                self.key_pattern.append(0)
+                                self.time_since_click_start = None
+                                if self.key_pattern[-2] == 3:
+                                    sound_right.play()
+                                else:
+                                    sound_left.play()
+                        if event.key == K_LEFT:
+                            if 2 != self.key_pattern[-1] != 0:
+                                self.key_pattern.append(2)
+                                self.time_since_click_start = None
+                                if self.key_pattern[-2] == 1:
+                                    sound_right.play()
+                                else:
+                                    sound_left.play()
+                        if event.key == K_UP:
+                            if 3 != self.key_pattern[-1] != 1:
+                                self.key_pattern.append(3)
+                                self.time_since_click_start = None
+                                if self.key_pattern[-2] == 2:
+                                    sound_right.play()
+                                else:
+                                    sound_left.play()
+                        if event.key == K_DOWN:
+                            if 1 != self.key_pattern[-1] != 3:
+                                self.key_pattern.append(1)
+                                self.time_since_click_start = None
+                                if self.key_pattern[-2] == 0:
+                                    sound_right.play()
+                                else:
+                                    sound_left.play()
+                    else:
+                        if event.key == K_RIGHT:
+                            if 0 != self.direction != 2:
+                                self.key_pattern.append(0)
+                                self.time_since_click_start = None
+                                if self.direction == 3:
+                                    sound_right.play()
+                                else:
+                                    sound_left.play()
+                        if event.key == K_LEFT:
+                            if 2 != self.direction != 0:
+                                self.key_pattern.append(2)
+                                self.time_since_click_start = None
+                                if self.direction == 1:
+                                    sound_right.play()
+                                else:
+                                    sound_left.play()
+                        if event.key == K_UP:
+                            if 3 != self.direction != 1:
+                                self.key_pattern.append(3)
+                                self.time_since_click_start = None
+                                if self.direction == 2:
+                                    sound_right.play()
+                                else:
+                                    sound_left.play()
+                        if event.key == K_DOWN:
+                            if 1 != self.direction != 3:
+                                self.key_pattern.append(1)
+                                self.time_since_click_start = None
+                                if self.direction == 0:
+                                    sound_right.play()
+                                else:
+                                    sound_left.play()
 
         keys = pygame.key.get_pressed()
         if keys[K_RIGHT] and self.direction == 0:
@@ -301,9 +344,11 @@ class Snake:
 
     def food_collision(self):
         if tuple(self.head) == food.grid_pos:
+            food.create_particles()
             food.randomize_position()
             self.length += 1
             self.wait_for_appending = True
+            sound_eat.play()
 
     def snake_collides_with(self, grid_pos: tuple):
         if grid_pos == tuple(self.head):
@@ -365,6 +410,7 @@ class Food:
     def __init__(self):
         self.grid_pos = (0, 0)
         self.randomize_position()
+        self.particles = []
 
     def randomize_position(self):
         while True:
@@ -383,13 +429,18 @@ class Food:
     def draw(self, surface):
         pygame.draw.rect(surface, (254, 1, 0), (self.grid_pos[0] * 20 + 4, self.grid_pos[1] * 20 + 4, 12, 12))
 
+    def create_particles(self):
+        abs_pos = [self.grid_pos[0] * 20, self.grid_pos[1] * 20]
+        for par_c in range(25):
+            self.particles.append([[*abs_pos, 6, 6], pygame.Vector2(randint(100, 500) / 100, 0).rotate(randint(0, 360)), 0])
+
 
 def change_text_transparency():
     global start_text, fade_direction
     if fade_direction == 0 and start_text.get_alpha() < 255:
-        start_text.set_alpha(start_text.get_alpha() + 15)
+        start_text.set_alpha(start_text.get_alpha() + 15 * dt)
     elif fade_direction == 1 and start_text.get_alpha() > 0:
-        start_text.set_alpha(start_text.get_alpha() - 15)
+        start_text.set_alpha(start_text.get_alpha() - 15 * dt)
     if fade_direction == 0 and start_text.get_alpha() == 255:
         fade_direction = 1
     elif fade_direction == 1 and start_text.get_alpha() == 0:
@@ -418,7 +469,12 @@ snake = Snake()
 snake.reset()
 food = Food()
 run = True
+last_frame = time()
+dt = 0  # DeltaTime for framerate independency
 while run:
+    dt = (time() - last_frame) * 60
+    last_frame = time()
+
     for event in pygame.event.get():
         if event.type == QUIT:
             change_score_data(snake)
@@ -435,7 +491,7 @@ while run:
                 else:
                     run = False
             if event.key == K_SPACE:
-                if not started:
+                if not started and not play_death_animation:
                     started = True
                     game_lost = False
                     snake.tbs = .25
@@ -452,26 +508,55 @@ while run:
         food.draw(screen)
         snake.draw(screen)
 
-    if not started:
+    if not started and not play_death_animation:
         screen.blit(score_text, score_text_rect)
         screen.blit(hs_text, hs_text_rect)
         screen.blit(start_text, start_text_rect)
         change_text_transparency()
 
-    if started:
+    if started or play_death_animation:
         snake.food_collision()
-        if not game_lost:
+        if not game_lost or play_death_animation:
             food.draw(screen)
-            snake.move()
+            if not play_death_animation:
+                snake.move()
             snake.draw(screen)
             draw_score()
-            if snake.length > 1:
+            if snake.length > 1 and not play_death_animation:
                 snake.tbs = .25 - (snake.length - 2) * .01
                 if snake.tbs < .1:
                     snake.tbs = .1
 
+    if play_death_animation:
+        if d_a_i == 0:
+            d_a_i = 75
+        d_a_s = screen.copy()
+        screen.fill((0, 0, 0))
+        screen.blit(d_a_s, (randint(-d_a_i // 2, d_a_i // 2), randint(-d_a_i // 2, d_a_i // 2)))
+        d_a_i -= 1
+        if d_a_i == 1:
+            d_a_i = 0
+            play_death_animation = False
+
+    if food.particles:
+        for particle_index, particle in reversed(list(enumerate(food.particles))):
+            particle[0][0] += particle[1][0]
+            particle[0][1] += particle[1][1]
+            pygame.draw.rect(screen, (255, 0, 0), (particle[0][0] - particle[0][2] / 2, particle[0][1] - particle[0][3], particle[0][2], particle[0][3]))
+            particle[2] += 1
+            particle[1][0] *= 0.9 * dt
+            particle[1][1] *= 0.9 * dt
+            if particle[2] >= 30:
+                particle[0][2] -= .25 * dt
+                particle[0][3] -= .25 * dt
+            if particle[2] >= 54:
+                food.particles.pop(particle_index)
+                continue
+        # print(food.particles)
+
     if not run:
         screen.fill((0, 0, 0))
+
     pygame.display.update()
     clock.tick(60)
 pygame.quit()
