@@ -147,58 +147,59 @@ class Snake:
         if self.saved_key_pattern != self.key_pattern:
             self.double_time = 0
         if (time() - self.saved_time >= self.tbs and self.double_time == 0) or (time() - self.saved_time >= .5 and self.double_time == 1):
-            self.saved_key_pattern = self.key_pattern.copy()
-            if self.double_time == 1 and not self.check_for_self_collide():
-                self.double_time = 0
-            if self.check_for_self_collide() and self.double_time == 0:
-                self.double_time = 1
-                return
-            elif self.check_for_self_collide() and self.double_time == 1:
-                game_lost = True
-                started = False
-                fade_direction = 0
-                start_text.set_alpha(0)
-                game_lost = True
-                play_death_animation = True
-                sound_die.play()
+            for r in range((int((time() - self.saved_time) // self.tbs), int((time() - self.saved_time) // .5))[self.double_time]):
+                self.saved_key_pattern = self.key_pattern.copy()
+                if self.double_time == 1 and not self.check_for_self_collision():
+                    self.double_time = 0
+                if self.check_for_self_collision() and self.double_time == 0:
+                    self.double_time = 1
+                    return
+                elif self.check_for_self_collision() and self.double_time == 1:
+                    game_lost = True
+                    started = False
+                    fade_direction = 0
+                    start_text.set_alpha(0)
+                    game_lost = True
+                    play_death_animation = True
+                    sound_die.play()
 
-            if not game_lost:
-                if len(self.key_pattern) > 0:
-                    self.direction = self.key_pattern[0]
-                    self.key_pattern.pop(0)
+                if not game_lost:
+                    if len(self.key_pattern) > 0:
+                        self.direction = self.key_pattern[0]
+                        self.key_pattern.pop(0)
 
-                if self.wait_for_appending and len(self.body) > 0:
-                    self.body.append(self.body[-1])
-                    self.wait_for_appending = False
+                    if self.wait_for_appending and len(self.body) > 0:
+                        self.body.append(self.body[-1])
+                        self.wait_for_appending = False
 
-                if len(self.body) > 0:
-                    self.body.insert(0,
-                                     (self.directions[self.direction][0] * -1, self.directions[self.direction][1] * -1))
-                    self.body.pop(-1)
-
-                if self.head[0] == 0 and self.direction == 2:
-                    self.head[0] = 24
-                elif self.head[0] == 24 and self.direction == 0:
-                    self.head[0] = 0
-                else:
-                    self.head[0] += self.directions[self.direction][0]
-
-                if self.head[1] == 0 and self.direction == 3:
-                    self.head[1] = 24
-                elif self.head[1] == 24 and self.direction == 1:
-                    self.head[1] = 0
-                else:
-                    self.head[1] += self.directions[self.direction][1]
-
-                if self.length < 2:
                     if len(self.body) > 0:
-                        self.body.append((11 - (self.head[0] + self.body[-1][0]), 11 - (self.head[1] + self.body[-1][1])))
-                    else:
-                        self.body.append(
-                            (self.directions[self.direction][0] * -1, self.directions[self.direction][1] * -1))
-                    self.length += 1
+                        self.body.insert(0,
+                                         (self.directions[self.direction][0] * -1, self.directions[self.direction][1] * -1))
+                        self.body.pop(-1)
 
-                self.saved_time = time()
+                    if self.head[0] == 0 and self.direction == 2:
+                        self.head[0] = 24
+                    elif self.head[0] == 24 and self.direction == 0:
+                        self.head[0] = 0
+                    else:
+                        self.head[0] += self.directions[self.direction][0]
+
+                    if self.head[1] == 0 and self.direction == 3:
+                        self.head[1] = 24
+                    elif self.head[1] == 24 and self.direction == 1:
+                        self.head[1] = 0
+                    else:
+                        self.head[1] += self.directions[self.direction][1]
+
+                    if self.length < 2:
+                        if len(self.body) > 0:
+                            self.body.append((11 - (self.head[0] + self.body[-1][0]), 11 - (self.head[1] + self.body[-1][1])))
+                        else:
+                            self.body.append(
+                                (self.directions[self.direction][0] * -1, self.directions[self.direction][1] * -1))
+                        self.length += 1
+
+                    self.saved_time = time()
 
     def draw(self, surface):
         corner = pygame.Surface((20, 20))
@@ -374,14 +375,14 @@ class Snake:
                     return True
         return False
 
-    def check_for_self_collide(self):
+    def check_for_self_collision(self):
         global high_score, score_text, score_text_rect, hs_text, hs_text_rect
         self.self_collide_check_cursor = self.head.copy()
         for index, tile in enumerate(self.body):
-            if index != len(self.body) - 1:
+            if index < len(self.body) - 1:
                 if self.self_collide_check_cursor[0] == 0 and tile[0] == -1:
                     self.self_collide_check_cursor[0] = 24
-                elif self.self_collide_check_cursor == 24 and tile[0] == 1:
+                elif self.self_collide_check_cursor[0] == 24 and tile[0] == 1:
                     self.self_collide_check_cursor[0] = 0
                 else:
                     self.self_collide_check_cursor[0] += tile[0]
@@ -431,8 +432,10 @@ class Food:
 
     def create_particles(self):
         abs_pos = [self.grid_pos[0] * 20, self.grid_pos[1] * 20]
-        for par_c in range(25):
-            self.particles.append([[*abs_pos, 6, 6], pygame.Vector2(randint(100, 500) / 100, 0).rotate(randint(0, 360)), 0])
+        # for par_c in range(25):
+        #     self.particles.append([[*abs_pos, 6, 6], pygame.Vector2(randint(100, 500) / 100, 0).rotate(randint(0, 360)), 0])
+        self.particles = [[[*abs_pos, 6, 6],
+                           pygame.Vector2(randint(100, 500) / 100, 0).rotate(randint(0, 360)), 0] for par in range(25)]
 
 
 def change_text_transparency():
@@ -515,12 +518,27 @@ while run:
         change_text_transparency()
 
     if started or play_death_animation:
-        snake.food_collision()
         if not game_lost or play_death_animation:
             food.draw(screen)
             if not play_death_animation:
                 snake.move()
+            snake.food_collision()
             snake.draw(screen)
+            if food.particles:
+                for particle_index, particle in reversed(list(enumerate(food.particles))):
+                    particle[0][0] += particle[1][0]
+                    particle[0][1] += particle[1][1]
+                    pygame.draw.rect(screen, (255, 0, 0), (particle[0][0] - particle[0][2] / 2, particle[0][1] - particle[0][3], particle[0][2], particle[0][3]))
+                    particle[2] += 1 * dt
+                    particle[1][0] *= 0.9 * dt
+                    particle[1][1] *= 0.9 * dt
+                    if particle[2] >= 30:
+                        particle[0][2] -= .25 * dt
+                        particle[0][3] -= .25 * dt
+                    if particle[2] >= 54:
+                        food.particles.pop(particle_index)
+                        continue
+                # print(food.particles)
             draw_score()
             if snake.length > 1 and not play_death_animation:
                 snake.tbs = .25 - (snake.length - 2) * .01
@@ -537,22 +555,6 @@ while run:
         if d_a_i == 1:
             d_a_i = 0
             play_death_animation = False
-
-    if food.particles:
-        for particle_index, particle in reversed(list(enumerate(food.particles))):
-            particle[0][0] += particle[1][0]
-            particle[0][1] += particle[1][1]
-            pygame.draw.rect(screen, (255, 0, 0), (particle[0][0] - particle[0][2] / 2, particle[0][1] - particle[0][3], particle[0][2], particle[0][3]))
-            particle[2] += 1
-            particle[1][0] *= 0.9 * dt
-            particle[1][1] *= 0.9 * dt
-            if particle[2] >= 30:
-                particle[0][2] -= .25 * dt
-                particle[0][3] -= .25 * dt
-            if particle[2] >= 54:
-                food.particles.pop(particle_index)
-                continue
-        # print(food.particles)
 
     if not run:
         screen.fill((0, 0, 0))
