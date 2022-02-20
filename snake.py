@@ -86,18 +86,19 @@ game_lost = False
 started = False
 
 
-def change_score_data(self):
+def change_score_data(self, hs=True):
     global high_score, hs_text, hs_text_rect, score_text, score_text_rect
-    if high_score < self.length - 2:
-        high_score = self.length - 2
-        hs_text = score_font.render(f"High-Score: {self.length - 2}", True, (0, 0, 0))
-        hs_text_rect = hs_text.get_rect()
-        hs_text_rect.bottomright = screen_rect.bottomright
-        hs_text_rect.x -= 5
-        hs_text_rect.y -= 5
-        with open("data.snx", "w") as d:
-            for i in str(high_score):
-                d.write(list(data_keys.keys())[int(i)])
+    if hs:
+        if high_score < self.length - 2:
+            high_score = self.length - 2
+            hs_text = score_font.render(f"High-Score: {self.length - 2}", True, (0, 0, 0))
+            hs_text_rect = hs_text.get_rect()
+            hs_text_rect.bottomright = screen_rect.bottomright
+            hs_text_rect.x -= 5
+            hs_text_rect.y -= 5
+            with open("data.snx", "w") as d:
+                for i in str(high_score):
+                    d.write(list(data_keys.keys())[int(i)])
     score_text = score_font.render(f"Score: {self.length - 2}", True, (0, 0, 0))
     score_text_rect = score_text.get_rect()
     score_text_rect.bottomleft = screen_rect.bottomleft
@@ -147,59 +148,59 @@ class Snake:
         if self.saved_key_pattern != self.key_pattern:
             self.double_time = 0
         if (time() - self.saved_time >= self.tbs and self.double_time == 0) or (time() - self.saved_time >= .5 and self.double_time == 1):
-            for r in range((int((time() - self.saved_time) // self.tbs), int((time() - self.saved_time) // .5))[self.double_time]):
-                self.saved_key_pattern = self.key_pattern.copy()
-                if self.double_time == 1 and not self.check_for_self_collision():
-                    self.double_time = 0
-                if self.check_for_self_collision() and self.double_time == 0:
-                    self.double_time = 1
-                    return
-                elif self.check_for_self_collision() and self.double_time == 1:
-                    game_lost = True
-                    started = False
-                    fade_direction = 0
-                    start_text.set_alpha(0)
-                    game_lost = True
-                    play_death_animation = True
-                    sound_die.play()
+            # for r in range((int((time() - self.saved_time) // self.tbs), int((time() - self.saved_time) // .5))[self.double_time]):
+            self.saved_key_pattern = self.key_pattern.copy()
+            if self.double_time == 1 and not self.check_for_self_collision():
+                self.double_time = 0
+            if self.check_for_self_collision() and self.double_time == 0:
+                self.double_time = 1
+                return
+            elif self.check_for_self_collision() and self.double_time == 1:
+                game_lost = True
+                started = False
+                fade_direction = 0
+                start_text.set_alpha(0)
+                game_lost = True
+                play_death_animation = True
+                sound_die.play()
 
-                if not game_lost:
-                    if len(self.key_pattern) > 0:
-                        self.direction = self.key_pattern[0]
-                        self.key_pattern.pop(0)
+            if not game_lost:
+                if len(self.key_pattern) > 0:
+                    self.direction = self.key_pattern[0]
+                    self.key_pattern.pop(0)
 
-                    if self.wait_for_appending and len(self.body) > 0:
-                        self.body.append(self.body[-1])
-                        self.wait_for_appending = False
+                if self.wait_for_appending and len(self.body) > 0:
+                    self.body.append(self.body[-1])
+                    self.wait_for_appending = False
 
+                if len(self.body) > 0:
+                    self.body.insert(0,
+                                     (self.directions[self.direction][0] * -1, self.directions[self.direction][1] * -1))
+                    self.body.pop(-1)
+
+                if self.head[0] == 0 and self.direction == 2:
+                    self.head[0] = 24
+                elif self.head[0] == 24 and self.direction == 0:
+                    self.head[0] = 0
+                else:
+                    self.head[0] += self.directions[self.direction][0]
+
+                if self.head[1] == 0 and self.direction == 3:
+                    self.head[1] = 24
+                elif self.head[1] == 24 and self.direction == 1:
+                    self.head[1] = 0
+                else:
+                    self.head[1] += self.directions[self.direction][1]
+
+                if self.length < 2:
                     if len(self.body) > 0:
-                        self.body.insert(0,
-                                         (self.directions[self.direction][0] * -1, self.directions[self.direction][1] * -1))
-                        self.body.pop(-1)
-
-                    if self.head[0] == 0 and self.direction == 2:
-                        self.head[0] = 24
-                    elif self.head[0] == 24 and self.direction == 0:
-                        self.head[0] = 0
+                        self.body.append((11 - (self.head[0] + self.body[-1][0]), 11 - (self.head[1] + self.body[-1][1])))
                     else:
-                        self.head[0] += self.directions[self.direction][0]
+                        self.body.append(
+                            (self.directions[self.direction][0] * -1, self.directions[self.direction][1] * -1))
+                    self.length += 1
 
-                    if self.head[1] == 0 and self.direction == 3:
-                        self.head[1] = 24
-                    elif self.head[1] == 24 and self.direction == 1:
-                        self.head[1] = 0
-                    else:
-                        self.head[1] += self.directions[self.direction][1]
-
-                    if self.length < 2:
-                        if len(self.body) > 0:
-                            self.body.append((11 - (self.head[0] + self.body[-1][0]), 11 - (self.head[1] + self.body[-1][1])))
-                        else:
-                            self.body.append(
-                                (self.directions[self.direction][0] * -1, self.directions[self.direction][1] * -1))
-                        self.length += 1
-
-                    self.saved_time = time()
+                self.saved_time = time()
 
     def draw(self, surface):
         corner = pygame.Surface((20, 20))
@@ -397,7 +398,7 @@ class Snake:
                 if len(self.key_pattern) > 0:
                     if tuple(self.self_collide_check_cursor) == (self.head[0] + self.directions[self.key_pattern[0]][0],
                                                                  self.head[1] + self.directions[self.key_pattern[0]][1]):
-                        change_score_data(self)
+                        change_score_data(self, False)
                         return True
                 else:
                     if tuple(self.self_collide_check_cursor) == (self.head[0] + self.directions[self.direction][0],
@@ -521,8 +522,11 @@ while run:
         if not game_lost or play_death_animation:
             food.draw(screen)
             if not play_death_animation:
+                snake.food_collision()
+                snake.food_collision()
                 snake.move()
-            snake.food_collision()
+                snake.food_collision()
+                snake.food_collision()
             snake.draw(screen)
             if food.particles:
                 for particle_index, particle in reversed(list(enumerate(food.particles))):
