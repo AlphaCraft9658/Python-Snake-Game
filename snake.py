@@ -403,7 +403,7 @@ class Snake:
                 else:
                     if tuple(self.self_collide_check_cursor) == (self.head[0] + self.directions[self.direction][0],
                                                                  self.head[1] + self.directions[self.direction][1]):
-                        change_score_data(self)
+                        change_score_data(self, False)
                         return True
         return False
 
@@ -528,21 +528,25 @@ while run:
                 snake.food_collision()
                 snake.food_collision()
             snake.draw(screen)
-            if food.particles:
-                for particle_index, particle in reversed(list(enumerate(food.particles))):
-                    particle[0][0] += particle[1][0]
-                    particle[0][1] += particle[1][1]
-                    pygame.draw.rect(screen, (255, 0, 0), (particle[0][0] - particle[0][2] / 2, particle[0][1] - particle[0][3], particle[0][2], particle[0][3]))
-                    particle[2] += 1 * dt
-                    particle[1][0] *= 0.9 * dt
-                    particle[1][1] *= 0.9 * dt
-                    if particle[2] >= 30:
-                        particle[0][2] -= .25 * dt
-                        particle[0][3] -= .25 * dt
-                    if particle[2] >= 54:
-                        food.particles.pop(particle_index)
-                        continue
-                # print(food.particles)
+
+    if food.particles:
+        for particle_index, particle in reversed(list(enumerate(food.particles))):
+            particle[0][0] += particle[1][0]
+            particle[0][1] += particle[1][1]
+            pygame.draw.rect(screen, (255, 0, 0), (particle[0][0] - particle[0][2] / 2, particle[0][1] - particle[0][3], particle[0][2], particle[0][3]))
+            particle[2] += 1 * dt
+            particle[1][0] *= 0.9 * dt
+            particle[1][1] *= 0.9 * dt
+            if particle[2] >= 30:
+                particle[0][2] -= .25 * dt
+                particle[0][3] -= .25 * dt
+            if particle[2] >= 54:
+                food.particles.pop(particle_index)
+                continue
+        # print(food.particles)
+
+    if started or play_death_animation:
+        if not game_lost or play_death_animation:
             draw_score()
             if snake.length > 1 and not play_death_animation:
                 snake.tbs = .25 - (snake.length - 2) * .01
