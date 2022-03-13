@@ -1,6 +1,6 @@
 import pygame
 from pygame.locals import *
-from time import time, sleep
+from time import time
 from random import randint
 from typing import Union
 from os import mkdir, path
@@ -38,6 +38,10 @@ score_text_rect.y -= 5
 live_hs_text = score_font.render("0", True, (0, 0, 0))
 live_hs_rect = live_hs_text.get_rect()
 live_hs_rect.y = 45
+
+muted_text = score_font.render("Muted", True, (0, 0, 0))
+muted_text_rect = muted_text.get_rect()
+muted_text_rect.centerx, muted_text_rect.y = screen_rect.centerx, screen_rect.bottom - 5 - muted_text_rect.height
 
 play_death_animation = False
 d_a_i = 0
@@ -92,6 +96,7 @@ for i in range(25):
 
 game_lost = False
 started = False
+muted = False
 
 
 def change_score_data(self, hs=True):
@@ -449,11 +454,13 @@ class Food:
 
 
 def change_text_transparency():
-    global start_text, fade_direction
+    global start_text, fade_direction, muted_text
     if fade_direction == 0 and start_text.get_alpha() < 255:
         start_text.set_alpha(start_text.get_alpha() + 15 * dt)
+        muted_text.set_alpha(start_text.get_alpha())
     elif fade_direction == 1 and start_text.get_alpha() > 0:
         start_text.set_alpha(start_text.get_alpha() - 15 * dt)
+        muted_text.set_alpha(start_text.get_alpha())
     if fade_direction == 0 and start_text.get_alpha() == 255:
         fade_direction = 1
     elif fade_direction == 1 and start_text.get_alpha() == 0:
@@ -483,7 +490,7 @@ snake.reset()
 food = Food()
 run = True
 last_frame = time()
-dt = 0  # DeltaTime for framerate independency
+dt = 0  # DeltaTime for frame rate independency
 while run:
     dt = (time() - last_frame) * 60
     last_frame = time()
@@ -510,6 +517,19 @@ while run:
                     snake.tbs = .25
                     snake.reset()
                     food.randomize_position()
+            if event.key == K_m:
+                if muted:
+                    muted = False
+                    pygame.mixer.Sound.set_volume(sound_left, 1)
+                    pygame.mixer.Sound.set_volume(sound_right, 1)
+                    pygame.mixer.Sound.set_volume(sound_eat, 1)
+                    pygame.mixer.Sound.set_volume(sound_die, 1)
+                else:
+                    muted = True
+                    pygame.mixer.Sound.set_volume(sound_left, 0)
+                    pygame.mixer.Sound.set_volume(sound_right, 0)
+                    pygame.mixer.Sound.set_volume(sound_eat, 0)
+                    pygame.mixer.Sound.set_volume(sound_die, 0)
         if started:
             snake.handle_input(event)
     snake.handle_input()
@@ -525,6 +545,8 @@ while run:
         screen.blit(score_text, score_text_rect)
         screen.blit(hs_text, hs_text_rect)
         screen.blit(start_text, start_text_rect)
+        if muted:
+            screen.blit(muted_text, muted_text_rect)
         change_text_transparency()
 
     if started or play_death_animation:
