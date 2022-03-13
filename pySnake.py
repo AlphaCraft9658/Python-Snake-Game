@@ -3,17 +3,16 @@ from pygame.locals import *
 from time import time, sleep
 from random import randint
 from typing import Union
+from os import mkdir, path
+from appdirs import user_data_dir
 
-pygame.mixer.pre_init(44100, -16, 2, 1024)
+# pygame.mixer.pre_init(44100, -16, 2, 1024)
 pygame.init()
 
 screen = pygame.display.set_mode((500, 500))
 pygame.display.set_caption("pySnake!")
 pygame.display.set_icon(pygame.image.load("img/icon.png"))
 
-# pygame.mixer.music.load("aud/music/back_music.wav")
-# pygame.mixer.music.set_volume(.5)
-# pygame.mixer.music.play(-1)
 sound_left = pygame.mixer.Sound("aud/sounds/left.wav")
 sound_right = pygame.mixer.Sound("aud/sounds/right.wav")
 sound_die = pygame.mixer.Sound("aud/sounds/die2.wav")
@@ -47,7 +46,16 @@ d_a_s = pygame.Surface((500, 500))
 high_score = 0
 
 data_keys = {"!": 0, "&": 1, "$": 2, "%": 3, "§": 4, "=": 5, "?": 6, ")": 7, "(": 8, "/": 9}
-data = open("data.snx", "r")
+data_dir_path = path.join(user_data_dir(), "pySnake")
+data_path = path.join(data_dir_path, "data.txt")
+
+if not path.exists(data_dir_path):
+    mkdir(data_dir_path)
+if not path.exists(data_path):
+    with open(data_path, "w") as init:
+        pass
+
+data = open(data_path, "r")
 data_value = list(data.read())
 for i in range(len(data_value)):
     if data_value[i] in data_keys:
@@ -55,7 +63,7 @@ for i in range(len(data_value)):
     else:
         data_value = ["0"]
         data.close()
-        data = open("data.snx", "w")
+        data = open(data_path, "w")
         data.write("!")
         break
 data_value = [str(i) for i in data_value]
@@ -65,7 +73,7 @@ try:
     int(data_value)
 except:
     data.close()
-    data = open("data.snx", "w")
+    data = open(data_path, "w")
     data.write("!")
 else:
     high_score = int(data_value)
@@ -96,9 +104,9 @@ def change_score_data(self, hs=True):
             hs_text_rect.bottomright = screen_rect.bottomright
             hs_text_rect.x -= 5
             hs_text_rect.y -= 5
-            with open("data.snx", "w") as d:
-                for i in str(high_score):
-                    d.write(list(data_keys.keys())[int(i)])
+            with open(data_path, "w") as d:
+                for number in str(high_score):
+                    d.write(list(data_keys.keys())[int(number)])
     score_text = score_font.render(f"Score: {self.length - 2}", True, (0, 0, 0))
     score_text_rect = score_text.get_rect()
     score_text_rect.bottomleft = screen_rect.bottomleft
