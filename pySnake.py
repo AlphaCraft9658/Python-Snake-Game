@@ -4,26 +4,39 @@ from time import time
 from random import randint
 from typing import Union
 from os import mkdir, path
+import sys
 from appdirs import user_data_dir
+
+
+def resource_path(relative_path):
+    # Get absolute path to resource, works for dev and for PyInstaller
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = path.abspath(".")
+
+    return path.join(base_path, relative_path)
+
 
 # pygame.mixer.pre_init(44100, -16, 2, 1024)
 pygame.init()
 
 screen = pygame.display.set_mode((500, 500))
 pygame.display.set_caption("pySnake!")
-pygame.display.set_icon(pygame.image.load("img/icon.png"))
+pygame.display.set_icon(pygame.image.load(resource_path("img/icon.png")))
 
-sound_left = pygame.mixer.Sound("aud/sounds/left.wav")
-sound_right = pygame.mixer.Sound("aud/sounds/right.wav")
-sound_die = pygame.mixer.Sound("aud/sounds/die2.wav")
-sound_eat = pygame.mixer.Sound("aud/sounds/eat.wav")
+sound_left = pygame.mixer.Sound(resource_path("aud/sounds/left.wav"))
+sound_right = pygame.mixer.Sound(resource_path("aud/sounds/right.wav"))
+sound_die = pygame.mixer.Sound(resource_path("aud/sounds/die2.wav"))
+sound_eat = pygame.mixer.Sound(resource_path("aud/sounds/eat.wav"))
 
 clock = pygame.time.Clock()
 screen_rect = screen.get_rect()
 
-font = pygame.font.Font("fonts/DisposableDroidBB_bld.ttf", 42)
-score_font = pygame.font.Font("fonts/DisposableDroidBB_bld.ttf", 32)
-live_score_font = pygame.font.Font("fonts/DisposableDroidBB_bld.ttf", 54)
+font = pygame.font.Font(resource_path("fonts/DisposableDroidBB_bld.ttf"), 42)
+score_font = pygame.font.Font(resource_path("fonts/DisposableDroidBB_bld.ttf"), 32)
+live_score_font = pygame.font.Font(resource_path("fonts/DisposableDroidBB_bld.ttf"), 54)
 start_text = font.render("Press space to start!", True, (0, 0, 0))
 start_text_rect = start_text.get_rect()
 start_text_rect.centerx = screen_rect.centerx
