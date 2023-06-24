@@ -8,7 +8,7 @@ You need to install the dependencies listed in requirements.txt if you don't alr
 Pip has an implemented feature for automatically installing requirement lists. The command usually is `pip install -r requirements.txt`.
 
 ## Possible issues
-On Windoes you might get a dll error, as this game was packaged not through Windoes but with wine, which has some dlls, which Windows doesn. Just ignore the warning and close it. The game should still run.
+On Windows you might get a dll error, as this game was packaged not on Windoes, but on Linux with wine, which has some dlls, which Windows doesn. Just ignore the warning and close it. The game should still run.
 On Linux you might have issues with the binary, as dependencies from pyinstaller/the packaged game might not be installed. If the binary doesn't run, you might try to install the dependencies if the game should list them. If not, you can download the source code and install the required python packages as listed above.
 
 ## Information for KDE-Plasma users
