@@ -457,9 +457,10 @@ def change_text_transparency():
     global start_text, fade_direction, muted_text
     if fade_direction == 0 and start_text.get_alpha() < 255:
         start_text.set_alpha(start_text.get_alpha() + 15 * dt)
+        muted_text.set_alpha(start_text.get_alpha())
     elif fade_direction == 1 and start_text.get_alpha() > 0:
         start_text.set_alpha(start_text.get_alpha() - 15 * dt)
-    muted_text.set_alpha(start_text.get_alpha())
+        muted_text.set_alpha(start_text.get_alpha())
     if fade_direction == 0 and start_text.get_alpha() == 255:
         fade_direction = 1
     elif fade_direction == 1 and start_text.get_alpha() == 0:
