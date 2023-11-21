@@ -575,12 +575,12 @@ while run:
 
     if food.particles:
         for particle_index, particle in reversed(list(enumerate(food.particles))):
-            particle[0][0] += particle[1][0]
-            particle[0][1] += particle[1][1]
+            particle[0][0] += particle[1][0] * dt
+            particle[0][1] += particle[1][1] * dt
             pygame.draw.rect(screen, (255, 0, 0), (particle[0][0] - particle[0][2] / 2, particle[0][1] - particle[0][3], particle[0][2], particle[0][3]))
             particle[2] += 1 * dt
-            particle[1][0] *= 0.9 * dt
-            particle[1][1] *= 0.9 * dt
+            particle[1][0] *= 0.9 ** dt
+            particle[1][1] *= 0.9 ** dt
             if particle[2] >= 30:
                 particle[0][2] -= .25 * dt
                 particle[0][3] -= .25 * dt
